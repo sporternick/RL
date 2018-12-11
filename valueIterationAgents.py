@@ -48,7 +48,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         for state in mdp.getStates():
             self.values[state] = self.mdp.getReward(state,"East",(2,2))
 
-        for I in range(iterations):
+        for I in range(iterations -1):
             for state in mdp.getStates()[1:]:
                 best = -2000
                 for action in self.mdp.getPossibleActions(state):
@@ -57,10 +57,8 @@ class ValueIterationAgent(ValueEstimationAgent):
                         best = current
                 if self.mdp.getReward(state,"East",(2,2)) == 0:
                     self.values[state] = best
-                
-        
 
-            
+
 
 
     def getValue(self, state):
@@ -76,12 +74,11 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        possibilities = self.mdp.getTransitionStatesAndProbs(state,action)
+        allpos = self.mdp.getTransitionStatesAndProbs(state,action)
         V = 0
-        for pos in possibilities:
-            V += pos[1]*self.getValue(pos[0])
-            
-        V *= self.discount
+        for pos in allpos:
+             V += pos[1]*self.getValue(pos[0])
+        V*= self.discount
         return V
 
     def computeActionFromValues(self, state):
@@ -94,14 +91,19 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        best = None
-        bestscore= -2000
-        for dir in self.mdp.getPossibleActions(state):
-            current = self.computeQValueFromValues(state,dir)
-            if current >  bestscore and current !=0:
-                bestscore = current
-                best = dir
-        return best
+        bestaction = None
+        score = None
+        for action in self.mdp.getPossibleActions(state):
+            current = self.computeQValueFromValues(state,action)
+            if score == None:
+                bestaction = action
+                score = current
+            elif current >  score:
+                 score = current
+                 bestaction = action
+        return bestaction
+
+
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
